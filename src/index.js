@@ -72,7 +72,11 @@ GitHub路由 (/gh/) 支持以下模式：
    /gh/https://github.com/owner/repo/releases/download/tag/file
    返回：直接代理下载
 
-5. 归档下载
+5. Releases标签页面 → 标签归档
+   /gh/https://github.com/owner/repo/releases/tag/tag-name
+   返回：指定标签的zip归档
+
+6. 归档下载
    /gh/https://github.com/owner/repo/archive/refs/heads/branch.zip
    返回：直接代理下载
 
@@ -100,6 +104,9 @@ git clone https://your-worker.workers.dev/git/https://github.com/octocat/Hello-W
 
 示例5：GitLab仓库
 https://your-worker.workers.dev/git/https://gitlab.com/user/project.git
+
+示例5：下载特定标签
+https://your-worker.workers.dev/gh/https://github.com/octocat/Hello-World/releases/tag/v1.0.0
 
 错误处理
 -------
@@ -171,9 +178,19 @@ async function handleGitHubRoute(request, pathSegments) {
   let targetUrl
 
   // 处理不同的GitHub资源类型
+  // 处理不同的GitHub资源类型
   if (repoPath.includes('/releases/download/')) {
-    // releases下载
-    targetUrl = fullPath
+  // releases下载
+  targetUrl = fullPath
+  } else if (repoPath.includes('/releases/tag/')) {
+  // releases/tag 转换为归档下载
+  const tagMatch = repoPath.match(/^([^\/]+\/[^\/]+)\/releases\/tag\/([^\/]+)$/)
+  if (tagMatch) {
+  const [_, repo, tag] = tagMatch
+  targetUrl = `${targetProto}://${targetHost}/${repo}/archive/refs/tags/${tag}.zip`
+  } else {
+  return new Response('Invalid releases/tag URL format', { status: 400 })
+  }
   } else if (repoPath.includes('/archive/')) {
     // 归档下载
     targetUrl = fullPath

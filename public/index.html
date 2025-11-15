@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<!-- by deepseek -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub & Git 代理工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        
+        .input-section {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        
+        .tutorial-section {
+            padding: 40px;
+            background: white;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .url-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .url-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .route-select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result-url {
+            word-break: break-all;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        .status-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .tutorial-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .tutorial-section h3 {
+            color: #3498db;
+            margin: 25px 0 15px 0;
+        }
+        
+        .tutorial-section p {
+            margin-bottom: 15px;
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .example-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .example-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>GitHub & Git 代理工具</h1>
+            <p>Cloudflare Worker 代理服务前端界面</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="workerUrl">Worker 部署地址：</label>
+                    <input type="text" id="workerUrl" class="url-input" 
+                           placeholder="https://your-worker.your-subdomain.workers.dev"
+                           value="https://your-worker.your-subdomain.workers.dev">
+                </div>
+                
+                <div class="form-group">
+                    <label for="routeType">路由类型：</label>
+                    <select id="routeType" class="route-select">
+                        <option value="/gh/">GitHub 专用路由 (/gh/)</option>
+                        <option value="/git/">Git 通用路由 (/git/)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="targetUrl">目标 URL：</label>
+                    <input type="text" id="targetUrl" class="url-input" 
+                           placeholder="https://github.com/owner/repo 或 Git 仓库地址">
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="openLink()">打开链接</button>
+                    <button class="btn btn-secondary" onclick="copyLink()" id="copyBtn">复制链接</button>
+                </div>
+                
+                <div id="statusMessage" class="status-message"></div>
+                
+                <div class="result-section" id="resultSection">
+                    <h3>生成的代理链接：</h3>
+                    <div class="result-url" id="resultUrl"></div>
+                </div>
+            </div>
+            
+            <div class="tutorial-section">
+                <h2>API 使用教程</h2>
+                
+                <h3>简介</h3>
+                <p>这是一个 Cloudflare Worker 代理服务，专门用于代理 GitHub 和 Git 仓库的请求。支持 GitHub 特定功能（如下载、原始文件、分支归档）和通用 Git 协议。</p>
+                
+                <h3>基本 URL 结构</h3>
+                <p>所有请求都基于您的 Worker 部署地址，格式为：</p>
+                <div class="code-block">https://your-worker.your-subdomain.workers.dev/{路由前缀}/{目标URL}</div>
+                
+                <h3>路由类型</h3>
+                <div class="example-list">
+                    <div class="example-item">
+                        <strong>GitHub 专用路由 (/gh/)</strong>
+                        <p>专门处理 GitHub.com 的请求，支持智能路径转换和自动处理分支/标签归档</p>
+                    </div>
+                    <div class="example-item">
+                        <strong>Git 通用路由 (/git/)</strong>
+                        <p>处理任意 Git 仓库的请求，支持 Git 协议操作</p>
+                    </div>
+                </div>
+                
+                <h3>API 端点详解</h3>
+                <p><strong>GitHub 路由 (/gh/) 支持以下模式：</strong></p>
+                <div class="example-list">
+                    <div class="example-item">
+                        <strong>仓库主页 → 主分支归档</strong>
+                        <p>/gh/https://github.com/owner/repo</p>
+                    </div>
+                    <div class="example-item">
+                        <strong>分支/标签页面 → 对应分支归档</strong>
+                        <p>/gh/https://github.com/owner/repo/tree/branch-name</p>
+                    </div>
+                    <div class="example-item">
+                        <strong>文件页面 → 原始文件</strong>
+                        <p>/gh/https://github.com/owner/repo/blob/branch/path/to/file</p>
+                    </div>
+                </div>
+                
+                <h3>使用示例</h3>
+                <div class="example-list">
+                    <div class="example-item">
+                        <strong>下载仓库主分支</strong>
+                        <p>https://your-worker.workers.dev/gh/https://github.com/octocat/Hello-World</p>
+                    </div>
+                    <div class="example-item">
+                        <strong>下载特定分支</strong>
+                        <p>https://your-worker.workers.dev/gh/https://github.com/octocat/Hello-World/tree/develop</p>
+                    </div>
+                    <div class="example-item">
+                        <strong>获取原始文件</strong>
+                        <p>https://your-worker.workers.dev/gh/https://github.com/octocat/Hello-World/blob/main/README.md</p>
+                    </div>
+                </div>
+                
+                <h3>注意事项</h3>
+                <ul style="padding-left: 20px; margin: 15px 0;">
+                    <li>不再支持直接 URL 格式，必须使用 /gh/ 或 /git/ 前缀</li>
+                    <li>GitHub 路由仅支持 github.com 域名</li>
+                    <li>大文件下载可能会受 Worker 执行时间限制</li>
+                    <li>建议用于公开仓库，私有仓库需要额外认证处理</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function validateUrl(url) {
+            try {
+                const urlObj = new URL(url);
+                return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+            } catch {
+                return false;
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = message;
+            statusElement.className = `status-message status-${type}`;
+            statusElement.style.display = 'block';
+            
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        function innerTEXT() {
+            const workerUrl = document.getElementById('workerUrl').value.trim();
+            const targetUrl = document.getElementById('targetUrl').value.trim();
+            
+            if (!workerUrl) {
+                showStatus('请输入 Worker 部署地址', 'error');
+                return;
+            }
+            
+            if (!targetUrl) {
+                showStatus('请输入目标 URL', 'error');
+                return;
+            }
+            
+            if (!validateUrl(targetUrl)) {
+                showStatus('请输入有效的 URL 地址（必须以 http:// 或 https:// 开头）', 'error');
+                return;
+            }
+            
+            const finalUrl = generateLink();
+            
+            document.getElementById('resultUrl').textContent = finalUrl;
+            document.getElementById('resultSection').style.display = 'block';
+            document.getElementById('copyBtn').disabled = false;
+            
+            showStatus('链接生成成功！', 'success');
+        }
+
+        function generateLink() {
+            const workerUrl = document.getElementById('workerUrl').value.trim();
+            const routeType = document.getElementById('routeType').value;
+            const targetUrl = document.getElementById('targetUrl').value.trim();
+
+            const baseUrl = workerUrl.replace(/\/+$/, '');
+            // const encodedTargetUrl = encodeURIComponent(targetUrl); // 不用编码
+            const finalUrl = `${baseUrl}${routeType}${targetUrl}`;
+            return finalUrl;
+            
+        }
+
+        function openLink() {
+            const resultUrl = document.getElementById('resultUrl').textContent;
+            window.open(resultUrl, '_blank');
+        }
+        
+        function copyLink() {
+            const resultUrl = document.getElementById('resultUrl').textContent;
+            
+            if (!resultUrl) {
+                showStatus('请先生成链接', 'error');
+                return;
+            }
+            
+            navigator.clipboard.writeText(resultUrl).then(() => {
+                showStatus('链接已复制到剪贴板！', 'success');
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = resultUrl;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showStatus('链接已复制到剪贴板！', 'success');
+            });
+        }
+        
+        document.getElementById('targetUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                innerTEXT();
+            }
+        });
+        
+        document.getElementById('workerUrl').addEventListener('input', function() {
+            document.getElementById('resultSection').style.display = 'none';
+        });
+        
+        document.getElementById('targetUrl').addEventListener('input', function() {
+            document.getElementById('resultSection').style.display = 'none';
+        });
+
+        document.getElementById('targetUrl').addEventListener('change', function() {
+            innerTEXT();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('workerUrl').value = window.location.origin;
+        });
+    </script>
+</body>
+</html>
